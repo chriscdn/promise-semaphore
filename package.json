@@ -1,10 +1,10 @@
 {
 	"name": "@chriscdn/promise-lock",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "",
 	"main": "lib/index.cjs.js",
 	"module": "lib/index.es.js",
-	"repository": "",
+	"repository": "https://github.com/chriscdn/promise-lock",
 	"author": "Christopher Meyer <chris@schwiiz.org>",
 	"license": "MIT",
 	"scripts": {
@@ -12,5 +12,10 @@
 	},
 	"devDependencies": {
 		"@rollup/plugin-commonjs": "^11.1.0"
-	}
+	},
+	"keywords": [
+		"lock",
+		"mutex",
+		"async"
+	]
 }

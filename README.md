@@ -1,18 +1,18 @@
 # @chriscdn/promise-lock
 
-Lock asynchronous code to prevent it from being run at the same time from different iterations of the event loop.
+Lock asynchronous code to prevent it from being run at the same time in different iterations of the event loop.
 
 ## Installing
 
 Using npm:
 
-``` bash
+```bash
 $ npm install @chriscdn/promise-lock
 ```
 
 Using yarn:
 
-``` bash
+```bash
 $ yarn add @chriscdn/promise-lock
 ```
 
@@ -20,14 +20,14 @@ $ yarn add @chriscdn/promise-lock
 
 ### Create an instance
 
-``` js
+```js
 const Lock = require('@chriscdn/promise-lock')
 const lock = new Lock()
 ```
 
 ### Acquire a lock
 
-``` js
+```js
 lock.acquire([key])
 ```
 
@@ -35,13 +35,13 @@ This returns a `Promise`, which resolves once the lock has been acquired.  The `
 
 ### Release a lock
 
-``` js
+```js
 lock.release([key])
 ```
 
 ## Example
 
-``` js
+```js
 const Lock = require('@chriscdn/promise-lock')
 const lock = new Lock()
 
