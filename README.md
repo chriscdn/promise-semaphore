@@ -1,1 +1,3 @@
-# promise-lock
+# @chriscdn/promise-lock
+
+...

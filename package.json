@@ -1,0 +1,13 @@
+{
+	"name": "@chriscdn/promise-lock",
+	"version": "1.0.0",
+	"description": "",
+	"main": "lib/index.cjs.js",
+	"module": "lib/index.es.js",
+	"repository": "",
+	"author": "Christopher Meyer <chris@schwiiz.org>",
+	"license": "MIT",
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^11.1.0"
+	}
+}
