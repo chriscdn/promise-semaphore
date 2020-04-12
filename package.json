@@ -7,6 +7,9 @@
 	"repository": "",
 	"author": "Christopher Meyer <chris@schwiiz.org>",
 	"license": "MIT",
+	"scripts": {
+		"build": "rollup -c"
+	},
 	"devDependencies": {
 		"@rollup/plugin-commonjs": "^11.1.0"
 	}
