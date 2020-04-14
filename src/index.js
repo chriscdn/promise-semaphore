@@ -1,18 +1,18 @@
-class LockItem {
-	constructor() {
+class SemaphoreItem {
+	constructor(max = 1) {
 		this.queue = []
-		this.isLocked = false
+		this.max = max
+		this.semaphoreCount = 0
 	}
 
 	acquire() {
-		if (this.isLocked) {
+		if (this.semaphoreCount < this.max) {
+			this.semaphoreCount++
+			return Promise.resolve()
+		} else {
 			return new Promise(resolve => {
 				this.queue.push(resolve)
 			})
-
-		} else {
-			this.isLocked = true
-			return Promise.resolve()
 		}
 	}
 
@@ -20,47 +20,49 @@ class LockItem {
 		let resolveFunc = this.queue.shift()
 
 		if (resolveFunc) {
+			// Should we setTimeout() this call to defer it to the next event loop iteration?
 			resolveFunc()
 		} else {
-			this.isLocked = false
+			this.semaphoreCount--
 		}
 	}
 }
 
 const defaultKey = '_default'
 
-class Lock {
-	constructor() {
-		this.lockItems = {}
+class Semaphore {
+	constructor(max = 1) {
+		this.semaphoreItems = {}
+		this.max = max
 	}
 
-	getLockItem(key = defaultKey) {
-		if (!this.lockItems[key]) {
-			this.lockItems[key] = new LockItem()
+	getSemaphoreInstance(key = defaultKey) {
+		if (!this.semaphoreItems[key]) {
+			this.semaphoreItems[key] = new SemaphoreItem(this.max)
 		}
-		return this.lockItems[key]
+		return this.semaphoreItems[key]
 	}
 
 	_tidy(key = defaultKey) {
-		if (this.lockItems[key].length == 0) {
-			delete this.lockItems[key]
+		if (this.semaphoreItems[key].length == 0) {
+			delete this.semaphoreItems[key]
 		}
 	}
 
 	acquire(key = defaultKey) {
-		return this.getLockItem(key).acquire()
+		return this.getSemaphoreInstance(key).acquire()
 	}
 
 	release(key = defaultKey) {
-		this.getLockItem(key).release()
+		this.getSemaphoreInstance(key).release()
 		this._tidy(key)
 	}
 
-	isLocked(key = defaultKey) {
-		const isLocked = this.getLockItem(key).isLocked
+	isSemaphoreed(key = defaultKey) {
+		const isSemaphoreed = this.getSemaphoreInstance(key).isSemaphoreed
 		this._tidy(key)
-		return isLocked
+		return isSemaphoreed
 	}
 }
 
-module.exports = Lock
+module.exports = Semaphore

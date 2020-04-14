@@ -1,10 +1,10 @@
 {
-	"name": "@chriscdn/promise-lock",
-	"version": "1.0.1",
-	"description": "",
+	"name": "@chriscdn/promise-semaphore",
+	"version": "1.0.2",
+	"description": "Limit or throttle the simultaneous execution of asynchronous code in separate iterations of the event loop.",
 	"main": "lib/index.cjs.js",
 	"module": "lib/index.es.js",
-	"repository": "https://github.com/chriscdn/promise-lock",
+	"repository": "https://github.com/chriscdn/promise-semaphore",
 	"author": "Christopher Meyer <chris@schwiiz.org>",
 	"license": "MIT",
 	"scripts": {
@@ -14,6 +14,7 @@
 		"@rollup/plugin-commonjs": "^11.1.0"
 	},
 	"keywords": [
+		"semeaphore",
 		"lock",
 		"mutex",
 		"async"

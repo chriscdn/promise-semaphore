@@ -1,19 +1,19 @@
-# @chriscdn/promise-lock
+# @chriscdn/promise-semaphore
 
-Lock asynchronous code to prevent it from being run at the same time in different iterations of the event loop.
+Limit or throttle the simultaneous execution of asynchronous code in separate iterations of the event loop.
 
 ## Installing
 
 Using npm:
 
 ```bash
-$ npm install @chriscdn/promise-lock
+$ npm install @chriscdn/promise-semaphore
 ```
 
 Using yarn:
 
 ```bash
-$ yarn add @chriscdn/promise-lock
+$ yarn add @chriscdn/promise-semaphore
 ```
 
 ## API
@@ -21,49 +21,51 @@ $ yarn add @chriscdn/promise-lock
 ### Create an instance
 
 ```js
-const Lock = require('@chriscdn/promise-lock')
-const lock = new Lock()
+const Semaphore = require('@chriscdn/promise-semaphore')
+const semaphore = new Semaphore([maxConcurrent])
 ```
+
+The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exclusive lock or *binary semaphore*).  Use an integer value greater than one to limit how many times the code block can be executing from separate iterations of the event loop.
 
 ### Acquire a lock
 
 ```js
-lock.acquire([key])
+semaphore.acquire([key])
 ```
 
-This returns a `Promise`, which resolves once the lock has been acquired.  The `key` parameter is optional and permits the same `Lock` instance to be used in different contexts.
+This returns a `Promise`, which resolves once a lock has been acquired.  The `key` parameter is optional and permits the same `Semaphore` instance to be used in different contexts.
 
 ### Release a lock
 
 ```js
-lock.release([key])
+semaphore.release([key])
 ```
 
 ## Example
 
 ```js
-const Lock = require('@chriscdn/promise-lock')
-const lock = new Lock()
+const Semaphore = require('@chriscdn/promise-semaphore')
+const semaphore = new Semaphore()
 
 // using promises
-lock.acquire()
+semaphore.acquire()
 	.then(() => {
-		// This block executes once the lock has been acquired.  If already locked
+		// This block executes once a lock has been acquired.  If already locked
 		// then this block will wait and execute once all locks preceeding it have been
 		// released.
 	})
 	.finally(() => {
-		// release the lock on completion
-		lock.release()
+		// release the lock permitting the next queued process to continue
+		semaphore.release()
 	})
 
 // or, using async/await
-await lock.acquire()
+await semaphore.acquire()
 
 try {
 	// do your stuff here
 } finally {
-	lock.release()
+	semaphore.release()
 }
 ```
 
