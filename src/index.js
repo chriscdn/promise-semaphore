@@ -1,13 +1,13 @@
 class SemaphoreItem {
-	constructor(max = 1) {
+	constructor(max) {
 		this.queue = []
 		this.max = max
-		this.semaphoreCount = 0
+		this.count = 0
 	}
 
 	acquire() {
-		if (this.semaphoreCount < this.max) {
-			this.semaphoreCount++
+		if (this.count < this.max) {
+			this.count++
 			return Promise.resolve()
 		} else {
 			return new Promise(resolve => {
@@ -20,10 +20,11 @@ class SemaphoreItem {
 		let resolveFunc = this.queue.shift()
 
 		if (resolveFunc) {
-			// Should we setTimeout() this call to defer it to the next event loop iteration?
-			resolveFunc()
+			// Give the micro task queue a small break
+			// resolveFunc()
+			setTimeout(resolveFunc, 0)
 		} else {
-			this.semaphoreCount--
+			this.count--
 		}
 	}
 }
@@ -36,7 +37,7 @@ class Semaphore {
 		this.max = max
 	}
 
-	getSemaphoreInstance(key = defaultKey) {
+	_getSemaphoreInstance(key = defaultKey) {
 		if (!this.semaphoreItems[key]) {
 			this.semaphoreItems[key] = new SemaphoreItem(this.max)
 		}
@@ -44,24 +45,19 @@ class Semaphore {
 	}
 
 	_tidy(key = defaultKey) {
-		if (this.semaphoreItems[key].length == 0) {
+		if (this.semaphoreItems[key].count == 0) {
 			delete this.semaphoreItems[key]
+			// console.log(`cleaning up: ${key}`)
 		}
 	}
 
 	acquire(key = defaultKey) {
-		return this.getSemaphoreInstance(key).acquire()
+		return this._getSemaphoreInstance(key).acquire()
 	}
 
 	release(key = defaultKey) {
-		this.getSemaphoreInstance(key).release()
+		this._getSemaphoreInstance(key).release()
 		this._tidy(key)
-	}
-
-	isSemaphoreed(key = defaultKey) {
-		const isSemaphoreed = this.getSemaphoreInstance(key).isSemaphoreed
-		this._tidy(key)
-		return isSemaphoreed
 	}
 }
 
