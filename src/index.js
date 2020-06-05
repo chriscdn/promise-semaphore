@@ -20,8 +20,7 @@ class SemaphoreItem {
 		let resolveFunc = this.queue.shift()
 
 		if (resolveFunc) {
-			// Give the micro task queue a small break
-			// resolveFunc()
+			// Give the micro task queue a small break instead of calling resoleFunc() directly
 			setTimeout(resolveFunc, 0)
 		} else {
 			this.count--
@@ -45,9 +44,8 @@ class Semaphore {
 	}
 
 	_tidy(key = defaultKey) {
-		if (this.semaphoreItems[key].count == 0) {
+		if (this._getSemaphoreInstance(key).count == 0) {
 			delete this.semaphoreItems[key]
-			// console.log(`cleaning up: ${key}`)
 		}
 	}
 
@@ -58,6 +56,18 @@ class Semaphore {
 	release(key = defaultKey) {
 		this._getSemaphoreInstance(key).release()
 		this._tidy(key)
+	}
+
+	count(key = defaultKey) {
+		if (this.semaphoreItems[key]) {
+			return this.semaphoreItems[key].count
+		} else {
+			return 0
+		}
+	}
+
+	hasTasks(key = defaultKey) {
+		return this.count(key) > 0
 	}
 }
 

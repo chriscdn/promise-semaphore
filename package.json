@@ -11,7 +11,7 @@
 		"build": "rollup -c"
 	},
 	"devDependencies": {
-		"@rollup/plugin-commonjs": "^11.1.0"
+		"@rollup/plugin-commonjs": "^13.0.0"
 	},
 	"keywords": [
 		"semeaphore",

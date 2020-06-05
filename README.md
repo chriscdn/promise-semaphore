@@ -25,7 +25,7 @@ const Semaphore = require('@chriscdn/promise-semaphore')
 const semaphore = new Semaphore([maxConcurrent])
 ```
 
-The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exclusive lock or *binary semaphore*).  Use an integer value greater than one to limit how many times the code block can be executing from separate iterations of the event loop.
+The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exclusive lock or *binary semaphore*).  Use an integer value greater than one to limit how many times the code block can be simultaneously executing from separate iterations of the event loop.
 
 ### Acquire a lock
 
