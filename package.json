@@ -14,7 +14,8 @@
 		"@rollup/plugin-commonjs": "^13.0.0"
 	},
 	"keywords": [
-		"semeaphore",
+		"promise",
+		"semaphore",
 		"lock",
 		"mutex",
 		"async"
