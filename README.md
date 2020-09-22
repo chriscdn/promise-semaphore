@@ -41,7 +41,7 @@ This returns a `Promise`, which resolves once a lock has been acquired.  The `ke
 semaphore.release([key])
 ```
 
-The `release` call should be executed from a `finally` block (whether using promises or a try/catch block) to ensure it always gets called.
+The `release` call should be executed from a `finally` block (whether using promises or a try/catch block) to guarantee it gets called.
 
 ## Example 1
 
@@ -81,7 +81,7 @@ async function downloadAndCache(url) {
 	// cacheFileName could be based on a hash of the url
 	const cacheFileName = getCacheFileName(url)
 
-	if (!await pathExists(cacheFileName)) {
+	if (!fs.existsSync(cacheFileName)) {
 		await downloadToFile(url, cacheFileName)
 	}
 
@@ -89,7 +89,7 @@ async function downloadAndCache(url) {
 }
 ```
 
-This works fine until a process calls `downloadAndCache()` in short succession with the same `url` parameter. This can cause multiple simultaneous downloads that attempt to write to the same cached file.
+This works until a process calls `downloadAndCache()` in short succession with the same `url` parameter. This can cause multiple simultaneous downloads that attempt to write to the same cached file.
 
 This can be resolved with a `Semaphore` instance using the `key` parameter:
 
@@ -117,6 +117,7 @@ async function downloadAndCache(url) {
 		semaphore.release(url)
 	}
 }
+```
 
 ## License
 
