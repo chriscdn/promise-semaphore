@@ -33,7 +33,7 @@ The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exc
 semaphore.acquire([key])
 ```
 
-This returns a `Promise`, which resolves once a lock has been acquired.  The `key` parameter is optional and permits the same `Semaphore` instance to be used in different contexts.
+This returns a `Promise`, which resolves once a lock has been acquired.  The `key` parameter is optional and permits the same `Semaphore` instance to be used in different contexts.  See the second example.
 
 ### Release a lock
 
@@ -41,7 +41,9 @@ This returns a `Promise`, which resolves once a lock has been acquired.  The `ke
 semaphore.release([key])
 ```
 
-## Example
+The `release` call should be executed from a `finally` block (whether using promises or a try/catch block) to ensure it always gets called.
+
+## Example 1
 
 ```js
 const Semaphore = require('@chriscdn/promise-semaphore')
@@ -68,6 +70,53 @@ try {
 	semaphore.release()
 }
 ```
+
+## Example 2
+
+Say you have an asynchronous function to download a file and cache it to disk:
+
+```js
+async function downloadAndCache(url) {
+
+	// cacheFileName could be based on a hash of the url
+	const cacheFileName = getCacheFileName(url)
+
+	if (!await pathExists(cacheFileName)) {
+		await downloadToFile(url, cacheFileName)
+	}
+
+	return cacheFileName
+}
+```
+
+This works fine until a process calls `downloadAndCache()` in short succession with the same `url` parameter. This can cause multiple simultaneous downloads that attempt to write to the same cached file.
+
+This can be resolved with a `Semaphore` instance using the `key` parameter:
+
+```js
+const Semaphore = require('@chriscdn/promise-semaphore')
+const semaphore = new Semaphore()
+
+async function downloadAndCache(url) {
+
+	await semaphore.acquire(url)
+
+	// This block continues once a lock on url is acquired.  This permits
+	// multiple simulataneous downloads for unique url values.
+
+	try {
+		const cacheFileName = getCacheFileName(url)
+
+		if (!await pathExists(cacheFileName)) {
+			await downloadToFile(url, cacheFileName)	
+		}
+
+		return cacheFileName
+
+	} finally {
+		semaphore.release(url)
+	}
+}
 
 ## License
 
