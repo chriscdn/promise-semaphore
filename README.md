@@ -81,7 +81,7 @@ async function downloadAndCache(url) {
 	// cacheFileName could be based on a hash of the url
 	const cacheFileName = getCacheFileName(url)
 
-	if (!fs.existsSync(cacheFileName)) {
+	if (!await pathExists(cacheFileName)) {
 		await downloadToFile(url, cacheFileName)
 	}
 
