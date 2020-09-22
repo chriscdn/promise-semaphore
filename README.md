@@ -78,14 +78,14 @@ Say you have an asynchronous function to download a file and cache it to disk:
 ```js
 async function downloadAndCache(url) {
 
-	// cacheFileName could be based on a hash of the url
-	const cacheFileName = getCacheFileName(url)
+	// cacheFilePath could be based on a hash of the url
+	const cacheFilePath = getCacheFilePath(url)
 
-	if (!await pathExists(cacheFileName)) {
-		await downloadToFile(url, cacheFileName)
+	if (!await pathExists(cacheFilePath)) {
+		await downloadToFile(url, cacheFilePath)
 	}
 
-	return cacheFileName
+	return cacheFilePath
 }
 ```
 
@@ -105,13 +105,13 @@ async function downloadAndCache(url) {
 	// multiple simulataneous downloads for unique url values.
 
 	try {
-		const cacheFileName = getCacheFileName(url)
+		const cacheFileName = getCacheFilePath(url)
 
-		if (!await pathExists(cacheFileName)) {
-			await downloadToFile(url, cacheFileName)	
+		if (!await pathExists(cacheFilePath)) {
+			await downloadToFile(url, cacheFilePath)	
 		}
 
-		return cacheFileName
+		return cacheFilePath
 
 	} finally {
 		semaphore.release(url)
