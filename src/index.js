@@ -17,10 +17,10 @@ class SemaphoreItem {
 	}
 
 	release() {
-		let resolveFunc = this.queue.shift()
+		const resolveFunc = this.queue.shift()
 
 		if (resolveFunc) {
-			// Give the micro task queue a small break instead of calling resoleFunc() directly
+			// Give the micro task queue a small break instead of calling resolveFunc() directly
 			setTimeout(resolveFunc, 0)
 		} else {
 			this.count--
