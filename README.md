@@ -57,7 +57,7 @@ This method is synchronous, and returns `true` if a lock can be immediately acqu
 const results = await semaphore.request(fn [,key])
 ```
 
-This is a convenient function to reduce the boilerplate when using `acquire` and `release`.  It's functionally equivalent to:
+This function reduces boilerplate when using `acquire` and `release`.  It is functionally equivalent to:
 
 ```js
 try {
