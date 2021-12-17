@@ -68,6 +68,8 @@ try {
 }
 ```
 
+See example 2 below.
+
 ### requestIfAvailable function
 
 ```js
@@ -168,7 +170,7 @@ async function downloadAndSave(url) {
 }
 ```
 
-Alternatively, this can be accomplished with the `request ` function:
+Alternatively, this can be accomplished with the `request` function:
 
 ```js
 async function downloadAndSave(url) {
