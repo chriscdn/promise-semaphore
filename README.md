@@ -51,7 +51,7 @@ semaphore.canAcquire([key])
 
 This method is synchronous, and returns `true` if a lock can be immediately acquired, `false` otherwise.
 
-### Request Function
+### request function
 
 ```js
 const results = await semaphore.request(fn [,key])
@@ -68,7 +68,7 @@ try {
 }
 ```
 
-### RequestIfAvailable Function
+### requestIfAvailable function
 
 ```js
 const results = await semaphore.requestIfAvailable(fn [,key])
