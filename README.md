@@ -82,7 +82,7 @@ const results = semaphore.canAcquire([key] ?
 	null
 ```
 
-This could be useful in situations where you only want one instance of a function block to run at a time, while discarding other attempts to execute the block.  E.g., a button that is being repeatedly tapped or clicked by the user.
+This is useful in situations where only one instance of a function block should run at a time, while discarding other attempts to execute the block.  E.g., a button that is being repeatedly tapped or clicked by the user.
 
 ## Example 1
 
@@ -173,7 +173,7 @@ Alternatively, this can be accomplished with the `request ` function:
 ```js
 async function downloadAndSave(url) {
 
-	return request(() => {
+	return semaphore.request(() => {
 		const filePath = urlToFilePath(url)
 	
 		if (await pathExists(filePath)) {
