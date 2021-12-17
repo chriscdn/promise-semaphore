@@ -43,6 +43,47 @@ semaphore.release([key])
 
 The `release` call should be executed from a `finally` block (whether using promises or a try/catch block) to guarantee it gets called.
 
+### Check if a lock can be acquired
+
+```js
+semaphore.canAcquire([key])
+```
+
+This method is synchronous, and returns `true` if a lock can be immediately acquired, `false` otherwise.
+
+### Request Function
+
+```js
+const results = await semaphore.request(fn [,key])
+```
+
+This is a convenient function to reduce the boilerplate when using `acquire` and `release`.  It's functionally equivalent to:
+
+```js
+try {
+	await semaphore.acquire([key])
+	const results = await fn()
+} finally {
+	semaphore.release([key])
+}
+```
+
+### RequestIfAvailable Function
+
+```js
+const results = await semaphore.requestIfAvailable(fn [,key])
+```
+
+This is functionally equivalent to:
+
+```js
+const results = semaphore.canAcquire([key] ?
+	await semaphore.request(fn, [key]) :
+	null
+```
+
+This could be useful in situations where you only want one instance of a function block to run at a time, while discarding other attempts to execute the block.  E.g., a button that is being repeatedly tapped or clicked by the user.
+
 ## Example 1
 
 ```js
@@ -52,20 +93,24 @@ const semaphore = new Semaphore()
 // using promises
 semaphore.acquire()
 	.then(() => {
-		// This block executes once a lock has been acquired.  If already locked
-		// then this block will wait and execute once all locks preceeding it have been
-		// released.
+		// This block executes once a lock has been acquired.  If already 
+		// locked then this block will wait and execute once all preceeding
+		// locks have been released.
+		
+		// do your critical stuff here
+		
 	})
 	.finally(() => {
-		// release the lock permitting the next queued process to continue
+		// release the lock permitting the next queued block to continue
 		semaphore.release()
 	})
 
 // or, using async/await
-await semaphore.acquire()
-
 try {
-	// do your stuff here
+	await semaphore.acquire()
+	
+	// do your critical stuff here
+	
 } finally {
 	semaphore.release()
 }
@@ -73,23 +118,24 @@ try {
 
 ## Example 2
 
-Say you have an asynchronous function to download a file and cache it to disk:
+Say you have an asynchronous function to download a file and save it to disk
 
 ```js
-async function downloadAndCache(url) {
+async function downloadAndSave(url) {
 
-	// cacheFilePath could be based on a hash of the url
-	const cacheFilePath = getCacheFilePath(url)
+	const filePath = urlToFilePath(url)
 
-	if (!await pathExists(cacheFilePath)) {
-		await downloadToFile(url, cacheFilePath)
+	if (await pathExists(filePath)) {
+		// the file is on disk, so no action is required
+	} else {
+		await downloadToFile(url, filePath)
 	}
 
-	return cacheFilePath
+	return filePath
 }
 ```
 
-This works until a process calls `downloadAndCache()` in short succession with the same `url` parameter. This can cause multiple simultaneous downloads that attempt to write to the same cached file.
+This works until a process calls `downloadAndSave()` in short succession with the same `url` parameter. This can cause multiple simultaneous downloads that attempt to write to the same file.
 
 This can be resolved with a `Semaphore` instance using the `key` parameter:
 
@@ -97,25 +143,48 @@ This can be resolved with a `Semaphore` instance using the `key` parameter:
 const Semaphore = require('@chriscdn/promise-semaphore')
 const semaphore = new Semaphore()
 
-async function downloadAndCache(url) {
-
-	await semaphore.acquire(url)
-
-	// This block continues once a lock on url is acquired.  This permits
-	// multiple simulataneous downloads for unique url values.
+async function downloadAndSave(url) {
 
 	try {
-		const cacheFileName = getCacheFilePath(url)
+	
+		await semaphore.acquire(url)
 
-		if (!await pathExists(cacheFilePath)) {
-			await downloadToFile(url, cacheFilePath)	
+		// This block continues once a lock on url is acquired.  This permits
+		// multiple simulataneous downloads for each unique url.
+	
+		const filePath = urlToFilePath(url)
+	
+		if (await pathExists(filePath)) {
+			// the file is on disk, so no action is required
+		} else {
+			await downloadToFile(url, filePath)
 		}
-
-		return cacheFilePath
+	
+		return filePath
 
 	} finally {
 		semaphore.release(url)
 	}
+}
+```
+
+Alternatively, this can be accomplished with the `request ` function:
+
+```js
+async function downloadAndSave(url) {
+
+	return request(() => {
+		const filePath = urlToFilePath(url)
+	
+		if (await pathExists(filePath)) {
+			// the file is on disk, so no action is required
+		} else {
+			await downloadToFile(url, filePath)
+		}
+	
+		return filePath	
+	}, url)
+
 }
 ```
 
