@@ -12,7 +12,7 @@ class SemaphoreItem {
   acquire() {
     if (this.canAcquire) {
       this.count++
-        return Promise.resolve()
+      return Promise.resolve()
     } else {
       return new Promise((resolve) => {
         this.queue.push(resolve)
