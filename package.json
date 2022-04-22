@@ -8,7 +8,8 @@
   "author": "Christopher Meyer <chris@schwiiz.org>",
   "license": "MIT",
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "watch": "rollup -c --watch"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.0.2"
