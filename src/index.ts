@@ -1,26 +1,28 @@
 class SemaphoreItem {
-  constructor(max) {
+  queue: Array<Function>
+  max: number
+  count: number
+
+  constructor(max: number) {
     this.queue = []
     this.max = max
     this.count = 0
   }
 
-  get canAcquire() {
+  get canAcquire(): boolean {
     return this.count < this.max
   }
 
-  acquire() {
+  acquire(): Promise<void> {
     if (this.canAcquire) {
       this.count++
       return Promise.resolve()
     } else {
-      return new Promise((resolve) => {
-        this.queue.push(resolve)
-      })
+      return new Promise((resolve) => this.queue.push(resolve))
     }
   }
 
-  release() {
+  release(): void {
     const resolveFunc = this.queue.shift()
 
     if (resolveFunc) {
@@ -35,38 +37,40 @@ class SemaphoreItem {
 const defaultKey = '_default'
 
 class Semaphore {
+  semaphoreItems: Record<string, SemaphoreItem>
+  max: number
   constructor(max = 1) {
     this.semaphoreItems = {}
     this.max = max
   }
 
-  _getSemaphoreInstance(key = defaultKey) {
+  private _getSemaphoreInstance(key: string | number = defaultKey) {
     if (!this.semaphoreItems[key]) {
       this.semaphoreItems[key] = new SemaphoreItem(this.max)
     }
     return this.semaphoreItems[key]
   }
 
-  _tidy(key = defaultKey) {
+  private _tidy(key: string | number = defaultKey): void {
     if (this._getSemaphoreInstance(key).count == 0) {
       delete this.semaphoreItems[key]
     }
   }
 
-  canAcquire(key = defaultKey) {
+  canAcquire(key: string | number = defaultKey): boolean {
     return this._getSemaphoreInstance(key).canAcquire
   }
 
-  acquire(key = defaultKey) {
+  acquire(key: string | number = defaultKey) {
     return this._getSemaphoreInstance(key).acquire()
   }
 
-  release(key = defaultKey) {
+  release(key: string | number = defaultKey): void {
     this._getSemaphoreInstance(key).release()
     this._tidy(key)
   }
 
-  count(key = defaultKey) {
+  count(key: string | number = defaultKey): number {
     if (this.semaphoreItems[key]) {
       return this.semaphoreItems[key].count
     } else {
@@ -74,11 +78,20 @@ class Semaphore {
     }
   }
 
-  hasTasks(key = defaultKey) {
+  hasTasks(key: string | number = defaultKey): boolean {
     return this.count(key) > 0
   }
 
-  async request(fn, key = defaultKey) {
+  /**
+   *
+   * @param {Function<T>} fn The function to execute.
+   * @param {string | number} [key] - Optional, the semaphore key.
+   * @returns {Promise<T>}
+   */
+  async request<T>(
+    fn: Function,
+    key: string | number = defaultKey
+  ): Promise<T> {
     try {
       await this.acquire(key)
       return await fn()
@@ -87,15 +100,24 @@ class Semaphore {
     }
   }
 
-  async requestIfAvailable(fn, key = defaultKey) {
+  /**
+   * Executes `fn` if it can acauire the lock.  Returns `null` if a lock cannot
+   * be acquired.
+   *
+   * @param {Function<T>} fn The function to execute.
+   * @param {string | number} [key] - Optional, the semaphore key.
+   * @returns {Promise<T>}
+   */
+  async requestIfAvailable<T>(
+    fn: Function,
+    key: string | number = defaultKey
+  ): Promise<T | null> {
     if (this.canAcquire(key)) {
       return this.request(fn, key)
     } else {
-      // Use canAcquire if you need to know if a function will be dismissed due
-      // to an existing lock.
       return null
     }
   }
 }
 
-module.exports = Semaphore
+export default Semaphore

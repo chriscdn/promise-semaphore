@@ -1,9 +1,10 @@
 {
   "name": "@chriscdn/promise-semaphore",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Limit or throttle the simultaneous execution of asynchronous code in separate iterations of the event loop.",
   "main": "lib/index.cjs.js",
   "module": "lib/index.es.js",
+  "types": "lib/index.d.ts",
   "repository": "https://github.com/chriscdn/promise-semaphore",
   "author": "Christopher Meyer <chris@schwiiz.org>",
   "license": "MIT",
@@ -12,7 +13,11 @@
     "watch": "rollup -c --watch"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.0.2"
+    "esbuild": "^0.17.5",
+    "rollup": "^3.12.1",
+    "rollup-plugin-dts": "^5.1.1",
+    "rollup-plugin-esbuild": "^5.0.0",
+    "typescript": "^4.9.5"
   },
   "keywords": [
     "promise",
