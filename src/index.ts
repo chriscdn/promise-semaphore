@@ -37,47 +37,83 @@ class SemaphoreItem {
 const defaultKey = '_default'
 
 class Semaphore {
-  semaphoreItems: Record<string, SemaphoreItem>
-  max: number
-  constructor(max = 1) {
-    this.semaphoreItems = {}
+  private semaphoreInstances: Record<string, SemaphoreItem>
+  private max: number
+
+  constructor(max: number = 1) {
+    this.semaphoreInstances = {}
     this.max = max
   }
 
-  private _getSemaphoreInstance(key: string | number = defaultKey) {
-    if (!this.semaphoreItems[key]) {
-      this.semaphoreItems[key] = new SemaphoreItem(this.max)
-    }
-    return this.semaphoreItems[key]
+  private hasSemaphoreInstance(key: string | number = defaultKey) {
+    return Boolean(this.semaphoreInstances[key])
   }
 
-  private _tidy(key: string | number = defaultKey): void {
-    if (this._getSemaphoreInstance(key).count == 0) {
-      delete this.semaphoreItems[key]
+  private getSemaphoreInstance(key: string | number = defaultKey) {
+    if (!this.hasSemaphoreInstance(key)) {
+      this.semaphoreInstances[key] = new SemaphoreItem(this.max)
+    }
+    return this.semaphoreInstances[key]
+  }
+
+  /**
+   *
+   * @param {string | number} [key]- Optional, the semaphore key.
+   */
+  private tidy(key: string | number = defaultKey): void {
+    if (
+      this.hasSemaphoreInstance(key) &&
+      this.getSemaphoreInstance(key).count == 0
+    ) {
+      delete this.semaphoreInstances[key]
     }
   }
 
+  /**
+   * A synchronous function to determine whether a lock can be acquired.
+   *
+   * @param {string | number} [key]- Optional, the semaphore key.
+   * @returns {boolean} Returns true if the lock on `key` can be acquired, false
+   * otherwise.
+   */
   canAcquire(key: string | number = defaultKey): boolean {
-    return this._getSemaphoreInstance(key).canAcquire
+    return this.getSemaphoreInstance(key).canAcquire
   }
 
+  /**
+   *
+   * @param {string | number} [key]- Optional, the semaphore key.
+   */
   acquire(key: string | number = defaultKey) {
-    return this._getSemaphoreInstance(key).acquire()
+    return this.getSemaphoreInstance(key).acquire()
   }
 
+  /**
+   *
+   * @param {string | number} [key]- Optional, the semaphore key.
+   */
   release(key: string | number = defaultKey): void {
-    this._getSemaphoreInstance(key).release()
-    this._tidy(key)
+    this.getSemaphoreInstance(key).release()
+    this.tidy(key)
   }
 
+  /**
+   *
+   * @param {string | number} [key]- Optional, the semaphore key.
+   */
   count(key: string | number = defaultKey): number {
-    if (this.semaphoreItems[key]) {
-      return this.semaphoreItems[key].count
+    if (this.hasSemaphoreInstance(key)) {
+      return this.getSemaphoreInstance(key).count
     } else {
       return 0
     }
   }
 
+  /**
+   *
+   * @param {string | number} [key]- Optional, the semaphore key.
+   * @returns {boolean} True if the semaphore and key has locks, false otherwise.
+   */
   hasTasks(key: string | number = defaultKey): boolean {
     return this.count(key) > 0
   }
@@ -85,7 +121,7 @@ class Semaphore {
   /**
    *
    * @param {Function<T>} fn The function to execute.
-   * @param {string | number} [key] - Optional, the semaphore key.
+   * @param {string | number} [key]- Optional, the semaphore key.
    * @returns {Promise<T>}
    */
   async request<T>(
@@ -101,11 +137,11 @@ class Semaphore {
   }
 
   /**
-   * Executes `fn` if it can acauire the lock.  Returns `null` if a lock cannot
-   * be acquired.
+   * Asynchronously executes `fn` if a lock can be immediately acquired.
+   * Otherwise, returns null.
    *
    * @param {Function<T>} fn The function to execute.
-   * @param {string | number} [key] - Optional, the semaphore key.
+   * @param {string | number} [key]- Optional, the semaphore key.
    * @returns {Promise<T>}
    */
   async requestIfAvailable<T>(

@@ -16,6 +16,10 @@ Using yarn:
 $ yarn add @chriscdn/promise-semaphore
 ```
 
+## Updating v1 to v2
+
+Version 2 adds TypeScript and better inline documentation. The API remains the same, and doesn't introduce any breaking changes.
+
 ## API
 
 ### Create an instance
