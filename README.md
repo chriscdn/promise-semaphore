@@ -88,21 +88,21 @@ const results = semaphore.canAcquire([key] ?
 	null
 ```
 
-This is useful in situations where only one instance of a function block should run at a time, while discarding other attempts to execute the block. E.g., a button that is being repeatedly tapped or clicked by the user.
+This is useful in situations where only one instance of a function block should run at a time, while discarding other attempts to execute the block. E.g., a button is repeatedly clicked.
 
 ## Example 1
 
 ```js
-const Semaphore = require('@chriscdn/promise-semaphore')
+import Semaphore from '@chriscdn/promise-semaphore'
 const semaphore = new Semaphore()
 
 // using promises
 semaphore
   .acquire()
   .then(() => {
-    // This block executes once a lock has been acquired.  If already
-    // locked then this block will wait and execute once all preceeding
-    // locks have been released.
+    // This block executes once a lock is acquired.  If already locked,
+    // then wait and execute once all preceeding locks have been released.
+    //
     // do your critical stuff here
   })
   .finally(() => {
@@ -127,7 +127,7 @@ semaphore.request(() => {
 
 ## Example 2
 
-Say you have an asynchronous function to download a file and save it to disk
+Say you have an asynchronous function to download a file and save it to disk:
 
 ```js
 async function downloadAndSave(url) {
@@ -136,34 +136,34 @@ async function downloadAndSave(url) {
   if (await pathExists(filePath)) {
     // the file is on disk, so no action is required
   } else {
-    await downloadToFile(url, filePath)
+    await downloadAndSaveToFilepath(url, filePath)
   }
 
   return filePath
 }
 ```
 
-This works until a process calls `downloadAndSave()` in short succession with the same `url` parameter. This can cause multiple simultaneous downloads that attempt to write to the same file.
+This works until a process calls `downloadAndSave()` multiple times in short succession with the same `url`. This can cause multiple simultaneous downloads that attempt to write to the same file at the same time.
 
 This can be resolved with a `Semaphore` instance using the `key` parameter:
 
 ```js
-const Semaphore = require('@chriscdn/promise-semaphore')
+import Semaphore from '@chriscdn/promise-semaphore'
 const semaphore = new Semaphore()
 
 async function downloadAndSave(url) {
   try {
     await semaphore.acquire(url)
 
-    // This block continues once a lock on url is acquired.  This permits
-    // multiple simulataneous downloads for each unique url.
+    // This block continues once a lock on url is acquired.  This
+    // permits multiple simulataneous downloads for different urls.
 
     const filePath = urlToFilePath(url)
 
     if (await pathExists(filePath)) {
       // the file is on disk, so no action is required
     } else {
-      await downloadToFile(url, filePath)
+      await downloadAndSaveToFilepath(url, filePath)
     }
 
     return filePath
@@ -184,7 +184,7 @@ async function downloadAndSave(url) {
 		if (await pathExists(filePath)) {
 			// the file is on disk, so no action is required
 		} else {
-			await downloadToFile(url, filePath)
+			await downloadAndSaveToFilepath(url, filePath)
 		}
 
 		return filePath
