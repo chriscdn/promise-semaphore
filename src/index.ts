@@ -1,16 +1,19 @@
 class SemaphoreItem {
-  queue: Array<Function>
-  max: number
-  count: number
+  private queue: Array<Function>
+  private maxConcurrent: number
+  /**
+   * The number of locks.
+   */
+  public count: number
 
-  constructor(max: number) {
+  constructor(maxConcurrent: number) {
     this.queue = []
-    this.max = max
+    this.maxConcurrent = maxConcurrent
     this.count = 0
   }
 
   get canAcquire(): boolean {
-    return this.count < this.max
+    return this.count < this.maxConcurrent
   }
 
   acquire(): Promise<void> {
@@ -28,6 +31,7 @@ class SemaphoreItem {
     if (resolveFunc) {
       // Give the micro task queue a small break instead of calling resolveFunc() directly
       setTimeout(resolveFunc, 0)
+      // resolveFunc()
     } else {
       this.count--
     }
@@ -37,12 +41,16 @@ class SemaphoreItem {
 const defaultKey = '_default'
 
 class Semaphore {
-  private semaphoreInstances: Record<string, SemaphoreItem>
-  private max: number
+  private semaphoreInstances: Record<string | number, SemaphoreItem>
+  private maxConcurrent: number
 
-  constructor(max: number = 1) {
+  /**
+   *
+   * @param {number} [maxConcurrent] The maximum number of concurrent locks.
+   */
+  constructor(maxConcurrent: number = 1) {
     this.semaphoreInstances = {}
-    this.max = max
+    this.maxConcurrent = maxConcurrent
   }
 
   private hasSemaphoreInstance(key: string | number = defaultKey) {
@@ -51,7 +59,7 @@ class Semaphore {
 
   private getSemaphoreInstance(key: string | number = defaultKey) {
     if (!this.hasSemaphoreInstance(key)) {
-      this.semaphoreInstances[key] = new SemaphoreItem(this.max)
+      this.semaphoreInstances[key] = new SemaphoreItem(this.maxConcurrent)
     }
     return this.semaphoreInstances[key]
   }
@@ -98,6 +106,7 @@ class Semaphore {
   }
 
   /**
+   * The number of active locks.  Will always be less or equal to `max`.
    *
    * @param {string | number} [key]- Optional, the semaphore key.
    */

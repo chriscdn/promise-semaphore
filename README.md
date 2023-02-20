@@ -25,7 +25,7 @@ Version 2 adds TypeScript and better inline documentation. The API remains the s
 ### Create an instance
 
 ```js
-const Semaphore = require('@chriscdn/promise-semaphore')
+import Semaphore from '@chriscdn/promise-semaphore'
 const semaphore = new Semaphore([maxConcurrent])
 ```
 

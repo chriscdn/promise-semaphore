@@ -1,7 +1,11 @@
 declare class Semaphore {
     private semaphoreInstances;
-    private max;
-    constructor(max?: number);
+    private maxConcurrent;
+    /**
+     *
+     * @param {number} [maxConcurrent] The maximum number of concurrent locks.
+     */
+    constructor(maxConcurrent?: number);
     private hasSemaphoreInstance;
     private getSemaphoreInstance;
     /**
@@ -28,6 +32,7 @@ declare class Semaphore {
      */
     release(key?: string | number): void;
     /**
+     * The number of active locks.  Will always be less or equal to `max`.
      *
      * @param {string | number} [key]- Optional, the semaphore key.
      */
