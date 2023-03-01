@@ -1,6 +1,6 @@
 {
   "name": "@chriscdn/promise-semaphore",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Limit or throttle the simultaneous execution of asynchronous code in separate iterations of the event loop.",
   "main": "lib/index.cjs.js",
   "module": "lib/index.es.js",
