@@ -12,8 +12,7 @@ export default [
       {
         file: pkg.main,
         format: 'cjs',
-        // sourcemap: true,
-        // exports: 'default',
+        sourcemap: true,
       },
     ],
   },
@@ -24,8 +23,7 @@ export default [
       {
         file: pkg.module,
         format: 'es',
-        // sourcemap: true,
-        // exports: 'default',
+        sourcemap: true,
       },
     ],
   },
@@ -33,8 +31,7 @@ export default [
     input,
     plugins: [dts()],
     output: {
-      file: 'lib/index.d.ts',
-      format: 'es',
+      file: pkg.types,
     },
   },
 ]
