@@ -60,5 +60,4 @@ declare class Semaphore {
      */
     requestIfAvailable<T>(fn: Function, key?: string | number): Promise<T | null>;
 }
-
-export { Semaphore as default };
+export default Semaphore;
