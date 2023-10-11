@@ -25,8 +25,8 @@ Version 2 adds TypeScript and better inline documentation. The API remains the s
 ### Create an instance
 
 ```js
-import Semaphore from '@chriscdn/promise-semaphore'
-const semaphore = new Semaphore([maxConcurrent])
+import Semaphore from "@chriscdn/promise-semaphore";
+const semaphore = new Semaphore([maxConcurrent]);
 ```
 
 The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exclusive lock or _binary semaphore_). Use an integer value greater than one to limit how many times the code block can be simultaneously executing from separate iterations of the event loop.
@@ -34,7 +34,7 @@ The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exc
 ### Acquire a lock
 
 ```js
-semaphore.acquire([key])
+semaphore.acquire([key]);
 ```
 
 This returns a `Promise`, which resolves once a lock has been acquired. The `key` parameter is optional and permits the same `Semaphore` instance to be used in different contexts. See the second example.
@@ -42,7 +42,7 @@ This returns a `Promise`, which resolves once a lock has been acquired. The `key
 ### Release a lock
 
 ```js
-semaphore.release([key])
+semaphore.release([key]);
 ```
 
 The `release` call should be executed from a `finally` block (whether using promises or a try/catch block) to guarantee it gets called.
@@ -50,7 +50,7 @@ The `release` call should be executed from a `finally` block (whether using prom
 ### Check if a lock can be acquired
 
 ```js
-semaphore.canAcquire([key])
+semaphore.canAcquire([key]);
 ```
 
 This method is synchronous, and returns `true` if a lock can be immediately acquired, `false` otherwise.
@@ -65,10 +65,10 @@ This function reduces boilerplate when using `acquire` and `release`. It returns
 
 ```js
 try {
-  await semaphore.acquire([key])
-  const results = await fn()
+  await semaphore.acquire([key]);
+  const results = await fn();
 } finally {
-  semaphore.release([key])
+  semaphore.release([key]);
 }
 ```
 
@@ -88,13 +88,13 @@ const results = semaphore.canAcquire([key] ?
 	null
 ```
 
-This is useful in situations where only one instance of a function block should run at a time, while discarding other attempts to execute the block. E.g., a button is repeatedly clicked.
+This is useful in situations when only one instance of a function block should run at a time, while discarding other attempts to execute the block. E.g., a button is repeatedly clicked.
 
 ## Example 1
 
 ```js
-import Semaphore from '@chriscdn/promise-semaphore'
-const semaphore = new Semaphore()
+import Semaphore from "@chriscdn/promise-semaphore";
+const semaphore = new Semaphore();
 
 // using promises
 semaphore
@@ -107,22 +107,22 @@ semaphore
   })
   .finally(() => {
     // release the lock permitting the next queued block to continue
-    semaphore.release()
-  })
+    semaphore.release();
+  });
 
 // or, using async/await
 try {
-  await semaphore.acquire()
+  await semaphore.acquire();
 
   // do your critical stuff here
 } finally {
-  semaphore.release()
+  semaphore.release();
 }
 
 // or, using the request function
 semaphore.request(() => {
   // do your critical stuff here
-})
+});
 ```
 
 ## Example 2
@@ -131,15 +131,15 @@ Say you have an asynchronous function to download a file and save it to disk:
 
 ```js
 async function downloadAndSave(url) {
-  const filePath = urlToFilePath(url)
+  const filePath = urlToFilePath(url);
 
   if (await pathExists(filePath)) {
     // the file is on disk, so no action is required
   } else {
-    await downloadAndSaveToFilepath(url, filePath)
+    await downloadAndSaveToFilepath(url, filePath);
   }
 
-  return filePath
+  return filePath;
 }
 ```
 
@@ -148,27 +148,27 @@ This works until a process calls `downloadAndSave()` multiple times in short suc
 This can be resolved with a `Semaphore` instance using the `key` parameter:
 
 ```js
-import Semaphore from '@chriscdn/promise-semaphore'
-const semaphore = new Semaphore()
+import Semaphore from "@chriscdn/promise-semaphore";
+const semaphore = new Semaphore();
 
 async function downloadAndSave(url) {
   try {
-    await semaphore.acquire(url)
+    await semaphore.acquire(url);
 
     // This block continues once a lock on url is acquired.  This
     // permits multiple simulataneous downloads for different urls.
 
-    const filePath = urlToFilePath(url)
+    const filePath = urlToFilePath(url);
 
     if (await pathExists(filePath)) {
       // the file is on disk, so no action is required
     } else {
-      await downloadAndSaveToFilepath(url, filePath)
+      await downloadAndSaveToFilepath(url, filePath);
     }
 
-    return filePath
+    return filePath;
   } finally {
-    semaphore.release(url)
+    semaphore.release(url);
   }
 }
 ```
