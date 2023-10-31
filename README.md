@@ -84,8 +84,8 @@ This is functionally equivalent to:
 
 ```js
 const results = semaphore.canAcquire([key] ?
-	await semaphore.request(fn, [key]) :
-	null
+  await semaphore.request(fn, [key]) :
+  null
 ```
 
 This is useful in situations when only one instance of a function block should run at a time, while discarding other attempts to execute the block. E.g., a button is repeatedly clicked.
@@ -178,17 +178,17 @@ Alternatively, this can be accomplished with the `request` function:
 ```js
 async function downloadAndSave(url) {
 
-	return semaphore.request(() => {
-		const filePath = urlToFilePath(url)
+  return semaphore.request(() => {
+    const filePath = urlToFilePath(url)
 
-		if (await pathExists(filePath)) {
-			// the file is on disk, so no action is required
-		} else {
-			await downloadAndSaveToFilepath(url, filePath)
-		}
+    if (await pathExists(filePath)) {
+      // the file is on disk, so no action is required
+    } else {
+      await downloadAndSaveToFilepath(url, filePath)
+    }
 
-		return filePath
-	}, url)
+    return filePath
+  }, url)
 
 }
 ```
