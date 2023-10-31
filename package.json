@@ -1,6 +1,6 @@
 {
   "name": "@chriscdn/promise-semaphore",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Limit or throttle the simultaneous execution of asynchronous code in separate iterations of the event loop.",
   "repository": "https://github.com/chriscdn/promise-semaphore",
   "author": "Christopher Meyer <chris@schwiiz.org>",
@@ -21,7 +21,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.5",
+    "@types/jest": "^29.5.7",
     "jest": "^29.7.0",
     "microbundle": "^0.15.1",
     "ts-jest": "^29.1.1"

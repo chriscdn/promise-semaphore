@@ -71,7 +71,7 @@ class Semaphore {
   private tidy(key: string | number = defaultKey): void {
     if (
       this.hasSemaphoreInstance(key) &&
-      this.getSemaphoreInstance(key).count == 0
+      this.getSemaphoreInstance(key).count === 0
     ) {
       delete this.semaphoreInstances[key];
     }
