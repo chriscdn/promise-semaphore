@@ -7,13 +7,13 @@ Limit or throttle the simultaneous execution of asynchronous code in separate it
 Using npm:
 
 ```bash
-$ npm install @chriscdn/promise-semaphore
+npm install @chriscdn/promise-semaphore
 ```
 
 Using yarn:
 
 ```bash
-$ yarn add @chriscdn/promise-semaphore
+yarn add @chriscdn/promise-semaphore
 ```
 
 ## Updating v1 to v2
@@ -88,7 +88,7 @@ const results = semaphore.canAcquire([key] ?
   null
 ```
 
-This is useful in situations when only one instance of a function block should run at a time, while discarding other attempts to execute the block. E.g., a button is repeatedly clicked.
+This is useful in situations when only one instance of a function block should run, while discarding other attempts to execute the block. E.g., a button is repeatedly clicked.
 
 ## Example 1
 
