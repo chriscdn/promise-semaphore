@@ -16,10 +16,6 @@ Using yarn:
 yarn add @chriscdn/promise-semaphore
 ```
 
-## Updating v1 to v2
-
-Version 2 adds TypeScript and better inline documentation. The API remains the same, and doesn't introduce any breaking changes.
-
 ## API
 
 ### Create an instance
@@ -29,7 +25,7 @@ import Semaphore from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore([maxConcurrent]);
 ```
 
-The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exclusive lock or _binary semaphore_). Use an integer value greater than one to limit how many times the code block can be simultaneously executing from separate iterations of the event loop.
+The `maxConcurrent` parameter is optional and defaults to `1` (making it an exclusive lock or _binary semaphore_). An integer greater than `1` can be used to allow multiple concurrent executions from separate iterations of the event loop.
 
 ### Acquire a lock
 
@@ -37,7 +33,7 @@ The `maxConcurrent` parameter is optional, and defaults to `1` (making it an exc
 semaphore.acquire([key]);
 ```
 
-This returns a `Promise`, which resolves once a lock has been acquired. The `key` parameter is optional and permits the same `Semaphore` instance to be used in different contexts. See the second example.
+This returns a `Promise` that resolves once a lock is acquired. The `key` parameter is optional and allows the same `Semaphore` instance to manage locks in different contexts. Additional details are provided in the second example.
 
 ### Release a lock
 
@@ -45,7 +41,7 @@ This returns a `Promise`, which resolves once a lock has been acquired. The `key
 semaphore.release([key]);
 ```
 
-The `release` call should be executed from a `finally` block (whether using promises or a try/catch block) to guarantee it gets called.
+The `release` method should be called within a `finally` block (whether using promises or a `try/catch` block) to ensure the lock is released.
 
 ### Check if a lock can be acquired
 
@@ -53,15 +49,15 @@ The `release` call should be executed from a `finally` block (whether using prom
 semaphore.canAcquire([key]);
 ```
 
-This method is synchronous, and returns `true` if a lock can be immediately acquired, `false` otherwise.
+This synchronous method returns `true` if a lock can be immediately acquired, and `false` otherwise.
 
-### request function
+### `request` function
 
 ```js
-const results = await semaphore.request(fn [,key])
+const results = await semaphore.request(fn [, key]);
 ```
 
-This function reduces boilerplate when using `acquire` and `release`. It returns a promise, which resolves once `fn` has completed. It is functionally equivalent to:
+This function reduces boilerplate when using `acquire` and `release`. It returns a promise that resolves when `fn` completes. It is functionally equivalent to:
 
 ```js
 try {
@@ -72,23 +68,21 @@ try {
 }
 ```
 
-See the examples below.
-
-### requestIfAvailable function
+### `requestIfAvailable` function
 
 ```js
-const results = await semaphore.requestIfAvailable(fn [,key])
+const results = await semaphore.requestIfAvailable(fn [, key]);
 ```
 
 This is functionally equivalent to:
 
 ```js
-const results = semaphore.canAcquire([key] ?
-  await semaphore.request(fn, [key]) :
-  null
+const results = semaphore.canAcquire([key])
+  ? await semaphore.request(fn, [key])
+  : null;
 ```
 
-This is useful in situations when only one instance of a function block should run, while discarding other attempts to execute the block. E.g., a button is repeatedly clicked.
+This is useful in scenarios where only one instance of a function block should run while discarding additional attempts. For example, handling repeated button clicks.
 
 ## Example 1
 
@@ -96,66 +90,66 @@ This is useful in situations when only one instance of a function block should r
 import Semaphore from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore();
 
-// using promises
+// Using promises
 semaphore
   .acquire()
   .then(() => {
-    // This block executes once a lock is acquired.  If already locked,
-    // then wait and execute once all preceeding locks have been released.
+    // This block executes once a lock is acquired.
+    // If already locked, it waits and executes after all preceding locks are released.
     //
-    // do your critical stuff here
+    // Critical operations are performed here.
   })
   .finally(() => {
-    // release the lock permitting the next queued block to continue
+    // The lock is released, allowing the next queued block to proceed.
     semaphore.release();
   });
 
-// or, using async/await
+// Using async/await
 try {
   await semaphore.acquire();
 
-  // do your critical stuff here
+  // Critical operations are performed here.
 } finally {
   semaphore.release();
 }
 
-// or, using the request function
-semaphore.request(() => {
-  // do your critical stuff here
+// Using the request function
+await semaphore.request(() => {
+  // Critical operations are performed here.
 });
 ```
 
 ## Example 2
 
-Say you have an asynchronous function to download a file and save it to disk:
+Consider an asynchronous function that downloads a file and saves it to disk:
 
 ```js
-async function downloadAndSave(url) {
+const downloadAndSave = async (url) => {
   const filePath = urlToFilePath(url);
 
   if (await pathExists(filePath)) {
-    // the file is on disk, so no action is required
-  } else {
-    await downloadAndSaveToFilepath(url, filePath);
+    // The file is already on disk, so no action is required.
+    return filePath;
   }
 
+  await downloadAndSaveToFilepath(url, filePath);
   return filePath;
-}
+};
 ```
 
-This works until a process calls `downloadAndSave()` multiple times in short succession with the same `url`. This can cause multiple simultaneous downloads that attempt to write to the same file at the same time.
+This approach works as expected until `downloadAndSave()` is called multiple times with the same `url` in quick succession. Without control, it could initiate simultaneous downloads that attempt to write to the same file at the same time.
 
-This can be resolved with a `Semaphore` instance using the `key` parameter:
+This issue can be resolved by using a `Semaphore` with the `key` parameter:
 
 ```js
 import Semaphore from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore();
 
-async function downloadAndSave(url) {
+const downloadAndSave = async (url) => {
   try {
     await semaphore.acquire(url);
 
-    // This block continues once a lock on url is acquired.  This
+    // This block continues once a lock on url is acquired. This
     // permits multiple simulataneous downloads for different urls.
 
     const filePath = urlToFilePath(url);
@@ -170,27 +164,26 @@ async function downloadAndSave(url) {
   } finally {
     semaphore.release(url);
   }
-}
+};
 ```
 
-Alternatively, this can be accomplished with the `request` function:
+The same outcome can be achieved using the `request` function:
 
 ```js
-async function downloadAndSave(url) {
-
-  return semaphore.request(() => {
-    const filePath = urlToFilePath(url)
+const downloadAndSave = (url) => {
+  return semaphore.request(async () => {
+    const filePath = urlToFilePath(url);
 
     if (await pathExists(filePath)) {
-      // the file is on disk, so no action is required
-    } else {
-      await downloadAndSaveToFilepath(url, filePath)
+      // The file is already on disk, so no action is required.
+      return filePath;
     }
 
-    return filePath
-  }, url)
+    await downloadAndSaveToFilepath(url, filePath);
 
-}
+    return filePath;
+  }, url);
+};
 ```
 
 ## License

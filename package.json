@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "microbundle": "^0.15.1",
-    "vitest": "^2.1.5"
+    "vitest": "^3.0.7"
   },
   "keywords": [
     "promise",
