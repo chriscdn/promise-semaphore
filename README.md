@@ -51,7 +51,23 @@ semaphore.canAcquire([key]);
 
 This synchronous method returns `true` if a lock can be immediately acquired, and `false` otherwise.
 
-### `request` function
+### `count`
+
+```js
+semaphore.count([key]);
+```
+
+This synchronous function returns the current number of locks.
+
+### `wait` method
+
+```js
+semaphore.wait([key]);
+```
+
+This asynchronous function resolves immediately if `count` is 0; otherwise, it resolves once `count` reaches 0.
+
+### `request` method
 
 ```js
 const results = await semaphore.request(fn [, key]);
@@ -68,7 +84,7 @@ try {
 }
 ```
 
-### `requestIfAvailable` function
+### `requestIfAvailable` method
 
 ```js
 const results = await semaphore.requestIfAvailable(fn [, key]);

@@ -1,6 +1,8 @@
 class SemaphoreItem {
   private queue: Array<Function>;
+  private waitQueue: Array<Function>;
   private maxConcurrent: number;
+
   /**
    * The number of locks.
    */
@@ -8,6 +10,7 @@ class SemaphoreItem {
 
   constructor(maxConcurrent: number) {
     this.queue = [];
+    this.waitQueue = [];
     this.maxConcurrent = maxConcurrent;
     this.count = 0;
   }
@@ -16,9 +19,22 @@ class SemaphoreItem {
     return this.count < this.maxConcurrent;
   }
 
+  private incrementCount() {
+    this.count++;
+  }
+
+  private decrementCount() {
+    this.count--;
+
+    if (this.count === 0) {
+      this.waitQueue.forEach((resolve) => resolve());
+      this.waitQueue = [];
+    }
+  }
+
   acquire(): Promise<void> {
     if (this.canAcquire) {
-      this.count++;
+      this.incrementCount();
       return Promise.resolve();
     } else {
       return new Promise((resolve) => this.queue.push(resolve));
@@ -31,10 +47,13 @@ class SemaphoreItem {
     if (resolveFunc) {
       // Give the micro task queue a small break instead of calling resolveFunc() directly
       setTimeout(resolveFunc, 0);
-      // resolveFunc()
     } else {
-      this.count--;
+      this.decrementCount();
     }
+  }
+
+  wait(): Promise<void> {
+    return new Promise((resolve) => this.waitQueue.push(resolve));
   }
 }
 
@@ -45,7 +64,6 @@ class Semaphore {
   private maxConcurrent: number;
 
   /**
-   *
    * @param {number} [maxConcurrent] The maximum number of concurrent locks.
    */
   constructor(maxConcurrent: number = 1) {
@@ -65,7 +83,6 @@ class Semaphore {
   }
 
   /**
-   *
    * @param {string | number} [key]- Optional, the semaphore key.
    */
   private tidy(key: string | number = defaultKey): void {
@@ -89,7 +106,6 @@ class Semaphore {
   }
 
   /**
-   *
    * @param {string | number} [key]- Optional, the semaphore key.
    */
   acquire(key: string | number = defaultKey) {
@@ -97,7 +113,6 @@ class Semaphore {
   }
 
   /**
-   *
    * @param {string | number} [key]- Optional, the semaphore key.
    */
   release(key: string | number = defaultKey): void {
@@ -119,7 +134,6 @@ class Semaphore {
   }
 
   /**
-   *
    * @param {string | number} [key]- Optional, the semaphore key.
    * @returns {boolean} True if the semaphore and key has locks, false otherwise.
    */
@@ -128,14 +142,13 @@ class Semaphore {
   }
 
   /**
-   *
    * @param {Function<T>} fn The function to execute.
    * @param {string | number} [key]- Optional, the semaphore key.
    * @returns {Promise<T>}
    */
   async request<T>(
     fn: Function,
-    key: string | number = defaultKey
+    key: string | number = defaultKey,
   ): Promise<T> {
     try {
       await this.acquire(key);
@@ -155,12 +168,20 @@ class Semaphore {
    */
   async requestIfAvailable<T>(
     fn: Function,
-    key: string | number = defaultKey
+    key: string | number = defaultKey,
   ): Promise<T | null> {
     if (this.canAcquire(key)) {
       return this.request(fn, key);
     } else {
       return null;
+    }
+  }
+
+  async wait(key: string | number = defaultKey) {
+    if (this.hasTasks(key)) {
+      return this.getSemaphoreInstance(key).wait();
+    } else {
+      return Promise.resolve();
     }
   }
 }

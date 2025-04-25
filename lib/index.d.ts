@@ -2,14 +2,12 @@ declare class Semaphore {
     private semaphoreInstances;
     private maxConcurrent;
     /**
-     *
      * @param {number} [maxConcurrent] The maximum number of concurrent locks.
      */
     constructor(maxConcurrent?: number);
     private hasSemaphoreInstance;
     private getSemaphoreInstance;
     /**
-     *
      * @param {string | number} [key]- Optional, the semaphore key.
      */
     private tidy;
@@ -22,12 +20,10 @@ declare class Semaphore {
      */
     canAcquire(key?: string | number): boolean;
     /**
-     *
      * @param {string | number} [key]- Optional, the semaphore key.
      */
     acquire(key?: string | number): Promise<void>;
     /**
-     *
      * @param {string | number} [key]- Optional, the semaphore key.
      */
     release(key?: string | number): void;
@@ -38,13 +34,11 @@ declare class Semaphore {
      */
     count(key?: string | number): number;
     /**
-     *
      * @param {string | number} [key]- Optional, the semaphore key.
      * @returns {boolean} True if the semaphore and key has locks, false otherwise.
      */
     hasTasks(key?: string | number): boolean;
     /**
-     *
      * @param {Function<T>} fn The function to execute.
      * @param {string | number} [key]- Optional, the semaphore key.
      * @returns {Promise<T>}
@@ -59,5 +53,6 @@ declare class Semaphore {
      * @returns {Promise<T>}
      */
     requestIfAvailable<T>(fn: Function, key?: string | number): Promise<T | null>;
+    wait(key?: string | number): Promise<void>;
 }
 export default Semaphore;
