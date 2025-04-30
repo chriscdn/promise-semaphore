@@ -177,6 +177,12 @@ class Semaphore {
     }
   }
 
+  /**
+   * Wait until the count on `key` is 0 and then resolve.
+   *
+   * @param key
+   * @returns
+   */
   async wait(key: string | number = defaultKey) {
     if (this.hasTasks(key)) {
       return this.getSemaphoreInstance(key).wait();
@@ -184,6 +190,13 @@ class Semaphore {
       return Promise.resolve();
     }
   }
+
+  // globalCount() {
+  //   return Object.values(this.semaphoreInstances).reduce(
+  //     (a, instance) => a + instance.count,
+  //     0,
+  //   );
+  // }
 }
 
 export default Semaphore;

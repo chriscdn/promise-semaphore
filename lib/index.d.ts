@@ -53,6 +53,12 @@ declare class Semaphore {
      * @returns {Promise<T>}
      */
     requestIfAvailable<T>(fn: Function, key?: string | number): Promise<T | null>;
+    /**
+     * Wait until the count on `key` is 0 and then resolve.
+     *
+     * @param key
+     * @returns
+     */
     wait(key?: string | number): Promise<void>;
 }
 export default Semaphore;
