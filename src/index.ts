@@ -200,3 +200,4 @@ class Semaphore {
 }
 
 export default Semaphore;
+export { Semaphore };

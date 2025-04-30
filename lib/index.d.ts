@@ -62,3 +62,4 @@ declare class Semaphore {
     wait(key?: string | number): Promise<void>;
 }
 export default Semaphore;
+export { Semaphore };
