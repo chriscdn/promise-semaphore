@@ -1,6 +1,5 @@
 class SemaphoreItem {
-  private queue: Array<Function>;
-  private waitQueue: Array<Function>;
+  private queue: Function[];
   private maxConcurrent: number;
 
   /**
@@ -10,7 +9,6 @@ class SemaphoreItem {
 
   constructor(maxConcurrent: number) {
     this.queue = [];
-    this.waitQueue = [];
     this.maxConcurrent = maxConcurrent;
     this.count = 0;
   }
@@ -25,11 +23,6 @@ class SemaphoreItem {
 
   private decrementCount() {
     this.count--;
-
-    if (this.count === 0) {
-      this.waitQueue.forEach((resolve) => resolve());
-      this.waitQueue = [];
-    }
   }
 
   acquire(): Promise<void> {
@@ -50,10 +43,6 @@ class SemaphoreItem {
     } else {
       this.decrementCount();
     }
-  }
-
-  wait(): Promise<void> {
-    return new Promise((resolve) => this.waitQueue.push(resolve));
   }
 }
 
@@ -102,7 +91,8 @@ class Semaphore {
    * otherwise.
    */
   canAcquire(key: string | number = defaultKey): boolean {
-    return this.getSemaphoreInstance(key).canAcquire;
+    return this.hasSemaphoreInstance(key) &&
+      this.getSemaphoreInstance(key).canAcquire;
   }
 
   /**
@@ -176,28 +166,6 @@ class Semaphore {
       return null;
     }
   }
-
-  /**
-   * Wait until the count on `key` is 0 and then resolve.
-   *
-   * @param key
-   * @returns
-   */
-  async wait(key: string | number = defaultKey) {
-    if (this.hasTasks(key)) {
-      return this.getSemaphoreInstance(key).wait();
-    } else {
-      return Promise.resolve();
-    }
-  }
-
-  // globalCount() {
-  //   return Object.values(this.semaphoreInstances).reduce(
-  //     (a, instance) => a + instance.count,
-  //     0,
-  //   );
-  // }
 }
 
-export default Semaphore;
 export { Semaphore };

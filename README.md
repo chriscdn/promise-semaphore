@@ -16,12 +16,26 @@ Using yarn:
 yarn add @chriscdn/promise-semaphore
 ```
 
+## Upgrade to v3
+
+Change
+
+```ts
+import Semaphore from "@chriscdn/promise-semaphore";
+```
+
+to
+
+```ts
+import { Semaphore } from "@chriscdn/promise-semaphore";
+```
+
 ## API
 
 ### Create an instance
 
 ```js
-import Semaphore from "@chriscdn/promise-semaphore";
+import { Semaphore } from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore([maxConcurrent]);
 ```
 
@@ -59,14 +73,6 @@ semaphore.count([key]);
 
 This synchronous function returns the current number of locks.
 
-### `wait` method
-
-```js
-semaphore.wait([key]);
-```
-
-This asynchronous function resolves immediately if `count` is 0; otherwise, it resolves once `count` reaches 0.
-
 ### `request` method
 
 ```js
@@ -103,7 +109,7 @@ This is useful in scenarios where only one instance of a function block should r
 ## Example 1
 
 ```js
-import Semaphore from "@chriscdn/promise-semaphore";
+import { Semaphore } from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore();
 
 // Using promises
@@ -158,7 +164,7 @@ This approach works as expected until `downloadAndSave()` is called multiple tim
 This issue can be resolved by using a `Semaphore` with the `key` parameter:
 
 ```js
-import Semaphore from "@chriscdn/promise-semaphore";
+import { Semaphore } from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore();
 
 const downloadAndSave = async (url) => {
