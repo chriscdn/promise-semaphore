@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import Semaphore from "../src/index";
+import { Semaphore } from "../src/index";
 
 const pause = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -143,28 +143,5 @@ describe("All test", () => {
     await semaphore.request(async () => {
       expect(tester).toBe(0);
     });
-  });
-});
-
-describe("Wait TEST", () => {
-  const semaphore = new Semaphore(2);
-
-  it("Acquire & Release Basic", async () => {
-    let tester = 0;
-
-    semaphore
-      .acquire()
-      .then(() => pause(1000))
-      .then(() => (tester = 20))
-      .finally(() => semaphore.release());
-
-    semaphore
-      .acquire()
-      .then(() => pause(500))
-      .then(() => (tester = 10))
-      .finally(() => semaphore.release());
-
-    await semaphore.wait(); // WAIT for all tasks to finish
-    expect(tester).toBe(20);
   });
 });

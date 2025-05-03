@@ -91,7 +91,7 @@ class Semaphore {
    * otherwise.
    */
   canAcquire(key: string | number = defaultKey): boolean {
-    return this.hasSemaphoreInstance(key) &&
+    return !this.hasSemaphoreInstance(key) ||
       this.getSemaphoreInstance(key).canAcquire;
   }
 
