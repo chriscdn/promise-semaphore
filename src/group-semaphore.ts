@@ -1,9 +1,9 @@
 import { Semaphore } from "./semaphore";
 
 /**
- * GroupSemaphore is a concurrency control mechanism that manages a shared
- * semaphore for different groups of tasks. Each group is identified by a unique
- * key, and the semaphore ensures only one group can run its tasks concurrently.
+ * GroupSemaphore manages a shared semaphore for different groups of tasks. Each
+ * group is identified by a unique key, and the semaphore ensures only one group
+ * can run its tasks concurrently.
  *
  * - acquire(key): Increments the active count for the given group. If it's the
  *   first task for the group (active count is 0), it acquires the global

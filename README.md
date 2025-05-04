@@ -266,8 +266,8 @@ const RunB = async () => {
 This setup allows `RunA` to be called multiple times, and will run concurrently.
 However, calling `RunB` will wait until all `GroupA` tasks are completed before
 acquiring the lock for `GroupB`. As soon as `GroupB` acquires the lock, any
-subsequent call to `RunA` will wait until `GroupB` releases the lock before it
-can execute.
+subsequent calls to `RunA` will wait until `GroupB` releases the lock before it
+executes.
 
 ## License
 
