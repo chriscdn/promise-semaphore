@@ -42,7 +42,7 @@ import { Semaphore } from "@chriscdn/promise-semaphore";
 
 ### Create an instance
 
-```js
+```ts
 import { Semaphore } from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore([maxConcurrent]);
 ```
@@ -54,7 +54,7 @@ loop.
 
 ### Acquire a lock
 
-```js
+```ts
 semaphore.acquire([key]);
 ```
 
@@ -64,7 +64,7 @@ in different contexts. Additional details are provided in the second example.
 
 ### Release a lock
 
-```js
+```ts
 semaphore.release([key]);
 ```
 
@@ -73,7 +73,7 @@ promises or a `try/catch` block) to ensure the lock is released.
 
 ### Check if a lock can be acquired
 
-```js
+```ts
 semaphore.canAcquire([key]);
 ```
 
@@ -82,7 +82,7 @@ and `false` otherwise.
 
 ### `count`
 
-```js
+```ts
 semaphore.count([key]);
 ```
 
@@ -90,14 +90,14 @@ This function is synchronous, and returns the current number of locks.
 
 ### `request` method
 
-```js
+```ts
 const results = await semaphore.request(fn [, key]);
 ```
 
 This function reduces boilerplate when using `acquire` and `release`. It returns
 a promise that resolves when `fn` completes. It is functionally equivalent to:
 
-```js
+```ts
 try {
   await semaphore.acquire([key]);
   return await fn();
@@ -108,13 +108,13 @@ try {
 
 ### `requestIfAvailable` method
 
-```js
+```ts
 const results = await semaphore.requestIfAvailable(fn [, key]);
 ```
 
 This is functionally equivalent to:
 
-```js
+```ts
 return semaphore.canAcquire([key]) ? await semaphore.request(fn, [key]) : null;
 ```
 
@@ -124,7 +124,7 @@ clicks.
 
 ## Example 1
 
-```js
+```ts
 import { Semaphore } from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore();
 
@@ -161,7 +161,7 @@ await semaphore.request(() => {
 
 Consider an asynchronous function that downloads a file and saves it to disk:
 
-```js
+```ts
 const downloadAndSave = async (url) => {
   const filePath = urlToFilePath(url);
 
@@ -176,13 +176,13 @@ const downloadAndSave = async (url) => {
 ```
 
 This approach works as expected until `downloadAndSave()` is called multiple
-times with the same `url` in quick succession. Without control, it could
+times in quick succession with the same `url`. Without control, it could
 initiate simultaneous downloads that attempt to write to the same file at the
 same time.
 
 This issue can be resolved by using a `Semaphore` with the `key` parameter:
 
-```js
+```ts
 import { Semaphore } from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore();
 
@@ -208,9 +208,9 @@ const downloadAndSave = async (url) => {
 };
 ```
 
-The same outcome can be achieved using the `request` function:
+The same outcome can be achieved by using the `request` function:
 
-```js
+```ts
 const downloadAndSave = (url) => {
   return semaphore.request(async () => {
     const filePath = urlToFilePath(url);
@@ -227,9 +227,9 @@ const downloadAndSave = (url) => {
 
 ## API - GroupSemaphore
 
-The `GroupSemaphore` class manages a semaphore for different groups of tasks. A
-group is identified by a key, and the semaphore ensures that only one group can
-run its tasks at a time. The tasks within a group can run concurrently.
+The `GroupSemaphore` class manages a semaphore for different _groups_ of tasks.
+A group is identified by a key, and the semaphore ensures that only one group
+can run its tasks at a time. The tasks within a group can run concurrently.
 
 The `GroupSemaphore` class exposes `acquire` and `release` methods, which have
 the same interface as `Semaphore`. The only difference is that the `key`
