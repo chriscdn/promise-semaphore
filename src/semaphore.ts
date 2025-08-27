@@ -1,5 +1,24 @@
+const defaultKey = "_default";
+
+type KeyPrimitive = string | number;
+
+type Key = KeyPrimitive | { key?: KeyPrimitive };
+type KeyOptions = Key & { priority?: number };
+
+const _isPrimitiveKey = (item: Key): item is KeyPrimitive =>
+    ["string", "number"].includes(typeof item);
+
+const resolveKey = (item: Key): KeyPrimitive =>
+    (_isPrimitiveKey(item) ? item : item.key) ?? defaultKey;
+
+const resolvePriority = (item: KeyOptions) =>
+    (_isPrimitiveKey(item) ? 0 : item.priority) ?? 0;
+
 class SemaphoreItem {
-    private queue: Function[];
+    private queue: Array<{
+        resolve: Function;
+        priority: number;
+    }>;
     private maxConcurrent: number;
 
     /**
@@ -25,12 +44,15 @@ class SemaphoreItem {
         this.count--;
     }
 
-    acquire(): Promise<void> {
+    acquire(priority: number): Promise<void> {
         if (this.canAcquire) {
             this.incrementCount();
             return Promise.resolve();
         } else {
-            return new Promise((resolve) => this.queue.push(resolve));
+            return new Promise((resolve) => {
+                this.queue.push({ resolve, priority });
+                this.queue.sort((a, b) => b.priority - a.priority);
+            });
         }
     }
 
@@ -39,14 +61,12 @@ class SemaphoreItem {
 
         if (resolveFunc) {
             // Give the micro task queue a small break instead of calling resolveFunc() directly
-            setTimeout(resolveFunc, 0);
+            setTimeout(resolveFunc.resolve, 0);
         } else {
             this.decrementCount();
         }
     }
 }
-
-const defaultKey = "_default";
 
 class Semaphore {
     private semaphoreInstances: Record<string | number, SemaphoreItem>;
@@ -60,11 +80,11 @@ class Semaphore {
         this.maxConcurrent = maxConcurrent;
     }
 
-    private hasSemaphoreInstance(key: string | number = defaultKey) {
+    private hasSemaphoreInstance(key: KeyPrimitive = defaultKey) {
         return Boolean(this.semaphoreInstances[key]);
     }
 
-    private getSemaphoreInstance(key: string | number = defaultKey) {
+    private getSemaphoreInstance(key: KeyPrimitive = defaultKey) {
         if (!this.hasSemaphoreInstance(key)) {
             this.semaphoreInstances[key] = new SemaphoreItem(
                 this.maxConcurrent,
@@ -76,7 +96,7 @@ class Semaphore {
     /**
      * @param {string | number} [key]- Optional, the semaphore key.
      */
-    private tidy(key: string | number = defaultKey): void {
+    private tidy(key: KeyPrimitive = defaultKey): void {
         if (
             this.hasSemaphoreInstance(key) &&
             this.getSemaphoreInstance(key).count === 0
@@ -92,24 +112,31 @@ class Semaphore {
      * @returns {boolean} Returns true if the lock on `key` can be acquired, false
      * otherwise.
      */
-    canAcquire(key: string | number = defaultKey): boolean {
-        return !this.hasSemaphoreInstance(key) ||
-            this.getSemaphoreInstance(key).canAcquire;
+    canAcquire(key: Key = defaultKey): boolean {
+        const _key = resolveKey(key);
+
+        return !this.hasSemaphoreInstance(_key) ||
+            this.getSemaphoreInstance(_key).canAcquire;
     }
 
     /**
      * @param {string | number} [key]- Optional, the semaphore key.
      */
-    acquire(key: string | number = defaultKey) {
-        return this.getSemaphoreInstance(key).acquire();
+    acquire(key: KeyOptions = defaultKey) {
+        const _key = resolveKey(key);
+        const _priority = resolvePriority(key);
+
+        return this.getSemaphoreInstance(_key).acquire(_priority);
     }
 
     /**
      * @param {string | number} [key]- Optional, the semaphore key.
      */
-    release(key: string | number = defaultKey): void {
-        this.getSemaphoreInstance(key).release();
-        this.tidy(key);
+    release(key: Key = defaultKey): void {
+        const _key = resolveKey(key);
+
+        this.getSemaphoreInstance(_key).release();
+        this.tidy(_key);
     }
 
     /**
@@ -117,19 +144,19 @@ class Semaphore {
      *
      * @param {string | number} [key]- Optional, the semaphore key.
      */
-    count(key: string | number = defaultKey): number {
-        if (this.hasSemaphoreInstance(key)) {
-            return this.getSemaphoreInstance(key).count;
-        } else {
-            return 0;
-        }
+    count(key: Key = defaultKey): number {
+        const _key = resolveKey(key);
+
+        return (this.hasSemaphoreInstance(_key))
+            ? this.getSemaphoreInstance(_key).count
+            : 0;
     }
 
     /**
      * @param {string | number} [key]- Optional, the semaphore key.
      * @returns {boolean} True if the semaphore and key has locks, false otherwise.
      */
-    hasTasks(key: string | number = defaultKey): boolean {
+    hasTasks(key: Key = defaultKey): boolean {
         return this.count(key) > 0;
     }
 
@@ -140,7 +167,7 @@ class Semaphore {
      */
     async request<T>(
         fn: Function,
-        key: string | number = defaultKey,
+        key: KeyOptions = defaultKey,
     ): Promise<T> {
         try {
             await this.acquire(key);
@@ -160,7 +187,7 @@ class Semaphore {
      */
     async requestIfAvailable<T>(
         fn: Function,
-        key: string | number = defaultKey,
+        key: KeyOptions = defaultKey,
     ): Promise<T | null> {
         if (this.canAcquire(key)) {
             return this.request(fn, key);

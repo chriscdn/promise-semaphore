@@ -145,3 +145,30 @@ describe("All test", () => {
     });
   });
 });
+
+describe("Priority", () => {
+  it("Priority", async () => {
+    const semaphore = new Semaphore(1);
+    let tester = 0;
+    let key = "yyz";
+
+    // this one is executed immediately since it's the first object
+    const p1 = semaphore.request(async () => {
+      tester = 5;
+    }, { key, priority: 0 });
+
+    // this one gets queued with priority 20
+    const p2 = semaphore.request(async () => {
+      tester = 10;
+    }, { key, priority: 20 });
+
+    // this one gets queued with priority 30, which should execute before p2
+    const p3 = semaphore.request(async () => {
+      expect(tester).toBe(5);
+    }, { key, priority: 30 });
+
+    semaphore.acquire({ priority: 5 });
+
+    await Promise.all([p1, p2, p3]);
+  });
+});

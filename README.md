@@ -21,9 +21,7 @@ yarn add @chriscdn/promise-semaphore
 
 Version 3 introduces two main changes:
 
-- A new `GroupSemaphore` class has been added. It allows multiple tasks within
-  the same group (identified by a key) to run concurrently while ensuring that
-  only one group's tasks are active at a time. See below for documentation.
+- A new `GroupSemaphore` class has been added. It allows multiple tasks within the same group (identified by a key) to run concurrently while ensuring that only one group's tasks are active at a time. See below for documentation.
 - The default export has been replaced with a named export.
 
 Change:
@@ -47,20 +45,22 @@ import { Semaphore } from "@chriscdn/promise-semaphore";
 const semaphore = new Semaphore([maxConcurrent]);
 ```
 
-The `maxConcurrent` parameter is optional and defaults to `1` (making it an
-exclusive lock or _binary semaphore_). An integer greater than `1` can be used
-to allow multiple concurrent executions from separate iterations of the event
-loop.
+The `maxConcurrent` parameter is optional and defaults to `1` (making it an exclusive lock or _binary semaphore_). An integer greater than `1` can be used to allow multiple concurrent executions from separate iterations of the event loop.
 
 ### Acquire a lock
 
 ```ts
-semaphore.acquire([key]);
+semaphore.acquire([options]);
 ```
 
-This returns a `Promise` that resolves once a lock is acquired. The `key`
-parameter is optional and allows the same `Semaphore` instance to manage locks
-in different contexts. Additional details are provided in the second example.
+This method returns a `Promise` that resolves when the lock is acquired.
+
+The `options` parameter is optional and can be:
+
+- A **key** (`string` or `number`): This lets a single Semaphore instance manage locks in different contexts (see the second example for `key` usage).
+- An **object** with the following properties (all optional):
+  - `key` (`string` or `number`): Functions the same as above.
+  - `priority` (`number`): Determines the order in which queued requests are processed. Higher values are processed first.
 
 ### Release a lock
 
@@ -68,8 +68,7 @@ in different contexts. Additional details are provided in the second example.
 semaphore.release([key]);
 ```
 
-The `release` method should be called within a `finally` block (whether using
-promises or a `try/catch` block) to ensure the lock is released.
+The `release` method should be called within a `finally` block (whether using promises or a `try/catch` block) to ensure the lock is released. It's crucial to call `release` with the same `key` the lock was acquired with.
 
 ### Check if a lock can be acquired
 
@@ -77,8 +76,7 @@ promises or a `try/catch` block) to ensure the lock is released.
 semaphore.canAcquire([key]);
 ```
 
-This synchronous method returns `true` if a lock can be immediately acquired,
-and `false` otherwise.
+This synchronous method returns `true` if a lock can be immediately acquired, and `false` otherwise.
 
 ### `count`
 
@@ -91,15 +89,14 @@ This function is synchronous, and returns the current number of locks.
 ### `request` method
 
 ```ts
-const results = await semaphore.request(fn [, key]);
+const results = await semaphore.request(fn [, options]);
 ```
 
-This function reduces boilerplate when using `acquire` and `release`. It returns
-a promise that resolves when `fn` completes. It is functionally equivalent to:
+This function reduces boilerplate when using `acquire` and `release`. It returns a promise that resolves when `fn` completes. It is functionally equivalent to:
 
 ```ts
 try {
-  await semaphore.acquire([key]);
+  await semaphore.acquire([options]);
   return await fn();
 } finally {
   semaphore.release([key]);
@@ -109,18 +106,18 @@ try {
 ### `requestIfAvailable` method
 
 ```ts
-const results = await semaphore.requestIfAvailable(fn [, key]);
+const results = await semaphore.requestIfAvailable(fn [, options]);
 ```
 
 This is functionally equivalent to:
 
 ```ts
-return semaphore.canAcquire([key]) ? await semaphore.request(fn, [key]) : null;
+return semaphore.canAcquire([key])
+  ? await semaphore.request(fn, [options])
+  : null;
 ```
 
-This is useful in scenarios where only one instance of a function block should
-run while discarding additional attempts. For example, handling repeated button
-clicks.
+This is useful in scenarios where only one instance of a function block should run while discarding additional attempts. For example, handling repeated button clicks.
 
 ## Example 1
 
@@ -175,10 +172,7 @@ const downloadAndSave = async (url) => {
 };
 ```
 
-This approach works as expected until `downloadAndSave()` is called multiple
-times in quick succession with the same `url`. Without control, it could
-initiate simultaneous downloads that attempt to write to the same file at the
-same time.
+This approach works as expected until `downloadAndSave()` is called multiple times in quick succession with the same `url`. Without control, it could initiate simultaneous downloads that attempt to write to the same file at the same time.
 
 This issue can be resolved by using a `Semaphore` with the `key` parameter:
 
@@ -227,13 +221,9 @@ const downloadAndSave = (url) => {
 
 ## API - GroupSemaphore
 
-The `GroupSemaphore` class manages a semaphore for different _groups_ of tasks.
-A group is identified by a key, and the semaphore ensures that only one group
-can run its tasks at a time. The tasks within a group can run concurrently.
+The `GroupSemaphore` class manages a semaphore for different _groups_ of tasks. A group is identified by a key, and the semaphore ensures that only one group can run its tasks at a time. The tasks within a group can run concurrently.
 
-The `GroupSemaphore` class exposes `acquire` and `release` methods, which have
-the same interface as `Semaphore`. The only difference is that the `key`
-parameter is required.
+The `GroupSemaphore` class exposes `acquire` and `release` methods, which have the same interface as `Semaphore`. The only difference is that the `key` parameter is required.
 
 ### Example
 
@@ -263,11 +253,7 @@ const RunB = async () => {
 };
 ```
 
-This setup allows `RunA` to be called multiple times, and will run concurrently.
-However, calling `RunB` will wait until all `GroupA` tasks are completed before
-acquiring the lock for `GroupB`. As soon as `GroupB` acquires the lock, any
-subsequent calls to `RunA` will wait until `GroupB` releases the lock before it
-executes.
+This setup allows `RunA` to be called multiple times, and will run concurrently. However, calling `RunB` will wait until all `GroupA` tasks are completed before acquiring the lock for `GroupB`. As soon as `GroupB` acquires the lock, any subsequent calls to `RunA` will wait until `GroupB` releases the lock before it executes.
 
 ## License
 
