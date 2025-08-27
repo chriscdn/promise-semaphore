@@ -57,7 +57,7 @@ This method returns a `Promise` that resolves when the lock is acquired.
 
 The `options` parameter is optional and can be:
 
-- A **key** (`string` or `number`): This lets a single Semaphore instance manage locks in different contexts (see the second example for `key` usage).
+- A **key** (`string` or `number`): This lets a single `Semaphore` instance manage locks in different contexts (see the second example for `key` usage).
 - An **object** with the following properties (all optional):
   - `key` (`string` or `number`): Functions the same as above.
   - `priority` (`number`): Determines the order in which queued requests are processed. Higher values are processed first.
