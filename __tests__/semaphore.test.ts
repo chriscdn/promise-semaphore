@@ -167,8 +167,6 @@ describe("Priority", () => {
       expect(tester).toBe(5);
     }, { key, priority: 30 });
 
-    semaphore.acquire({ priority: 5 });
-
     await Promise.all([p1, p2, p3]);
   });
 });

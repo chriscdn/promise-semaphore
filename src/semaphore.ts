@@ -78,6 +78,10 @@ class Semaphore {
     constructor(maxConcurrent: number = 1) {
         this.semaphoreInstances = {};
         this.maxConcurrent = maxConcurrent;
+
+        if (maxConcurrent < 1) {
+            throw new Error("The maxConcurrent must be 1 or greater.");
+        }
     }
 
     private hasSemaphoreInstance(key: KeyPrimitive = defaultKey) {

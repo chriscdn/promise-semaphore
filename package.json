@@ -23,8 +23,11 @@
   },
   "devDependencies": {
     "microbundle": "^0.15.1",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.5"
   },
+  "files": [
+    "lib"
+  ],
   "keywords": [
     "promise",
     "semaphore",
@@ -32,6 +35,5 @@
     "mutex",
     "async",
     "throttle"
-  ],
-  "dependencies": {}
+  ]
 }
