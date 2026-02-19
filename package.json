@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "microbundle": "^0.15.1",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.18"
   },
   "files": [
     "lib"
