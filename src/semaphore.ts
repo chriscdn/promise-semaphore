@@ -62,6 +62,7 @@ class SemaphoreItem {
         if (resolveFunc) {
             // Give the micro task queue a small break instead of calling resolveFunc() directly
             setTimeout(resolveFunc.resolve, 0);
+            // queueMicrotask(() => resolveFunc.resolve());
         } else {
             this.decrementCount();
         }
@@ -94,7 +95,7 @@ class Semaphore {
                 this.maxConcurrent,
             );
         }
-        return this.semaphoreInstances[key];
+        return this.semaphoreInstances[key] as SemaphoreItem;
     }
 
     /**

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { Semaphore } from "../src/index";
+import { Semaphore } from "../lib";
 
-const pause = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const pause = async (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("All test", () => {
   it("Acquire & Release Basic", async () => {

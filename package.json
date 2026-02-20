@@ -6,24 +6,31 @@
   "author": "Christopher Meyer <chris@schwiiz.org>",
   "license": "MIT",
   "type": "module",
-  "source": "./src/index.ts",
-  "main": "./lib/promise-semaphore.cjs",
-  "module": "./lib/promise-semaphore.module.js",
-  "__unpkg": "./lib/promise-semaphore.umd.js",
-  "exports": {
-    "types": "./lib/index.d.ts",
-    "require": "./lib/promise-semaphore.cjs",
-    "default": "./lib/promise-semaphore.modern.js"
-  },
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      },
+      "require": {
+        "types": "./lib/index.d.cts",
+        "default": "./lib/index.cjs"
+      }
+    }
+  },
   "scripts": {
-    "build": "rm -rf ./lib/ && microbundle --format modern,esm,cjs",
-    "dev": "microbundle watch",
+    "build": "tsup",
+    "watch": "yarn build --watch",
     "test": "vitest"
   },
   "devDependencies": {
-    "microbundle": "^0.15.1",
-    "vitest": "^4.0.18"
+    "@tsconfig/strictest": "^2.0.8",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.8"
   },
   "files": [
     "lib"

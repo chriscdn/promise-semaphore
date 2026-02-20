@@ -31,7 +31,7 @@ class GroupSemaphore {
     }
 
     release(key: string) {
-        const activeCount = this._activeCounts[key];
+        const activeCount = this._activeCounts[key] as number;
 
         if (activeCount === 1) {
             this._semaphore.release();
