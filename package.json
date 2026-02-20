@@ -1,6 +1,6 @@
 {
   "name": "@chriscdn/promise-semaphore",
-  "version": "3.1.2",
+  "version": "3.1.3",
   "description": "Limit or throttle the simultaneous execution of asynchronous code in separate iterations of the event loop.",
   "repository": "https://github.com/chriscdn/promise-semaphore",
   "author": "Christopher Meyer <chris@schwiiz.org>",
