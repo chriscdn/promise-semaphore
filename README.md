@@ -11,17 +11,11 @@ Using npm:
 npm install @chriscdn/promise-semaphore
 ```
 
-Using yarn:
-
-```bash
-yarn add @chriscdn/promise-semaphore
-```
-
 ## Version 3
 
 Version 3 introduces two main changes:
 
-- A new `GroupSemaphore` class has been added. It allows multiple tasks within the same group (identified by a key) to run concurrently while ensuring that only one group's tasks are active at a time. See below for documentation.
+- A new `GroupSemaphore` class has been added. It allows multiple tasks within the same group (identified by a key) to run concurrently while ensuring that only one group's tasks are active at a time. See documenation below for details.
 - The default export has been replaced with a named export.
 
 Change:

@@ -18,29 +18,29 @@ import { Semaphore } from "./semaphore";
  * are active.
  */
 class GroupSemaphore {
-    private _semaphore = new Semaphore();
-    private _activeCounts: Record<string, number> = {};
-    private _groupWaiters: Record<string, Promise<void>> = {};
+  private _semaphore = new Semaphore();
+  private _activeCounts: Record<string, number> = {};
+  private _groupWaiters: Record<string, Promise<void>> = {};
 
-    async acquire(key: string) {
-        const activeCount = this._activeCounts[key] ?? 0;
-        this._activeCounts[key] = activeCount + 1;
-        const waiter = this._groupWaiters[key] ?? this._semaphore.acquire();
-        this._groupWaiters[key] = waiter;
-        await waiter;
+  async acquire(key: string) {
+    const activeCount = this._activeCounts[key] ?? 0;
+    this._activeCounts[key] = activeCount + 1;
+    const waiter = this._groupWaiters[key] ?? this._semaphore.acquire();
+    this._groupWaiters[key] = waiter;
+    await waiter;
+  }
+
+  release(key: string) {
+    const activeCount = this._activeCounts[key] as number;
+
+    if (activeCount === 1) {
+      this._semaphore.release();
+      delete this._activeCounts[key];
+      delete this._groupWaiters[key];
+    } else {
+      this._activeCounts[key] = activeCount - 1;
     }
-
-    release(key: string) {
-        const activeCount = this._activeCounts[key] as number;
-
-        if (activeCount === 1) {
-            this._semaphore.release();
-            delete this._activeCounts[key];
-            delete this._groupWaiters[key];
-        } else {
-            this._activeCounts[key] = activeCount - 1;
-        }
-    }
+  }
 }
 
 export { GroupSemaphore };
